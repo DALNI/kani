@@ -68,7 +68,7 @@ body {
   -webkit-user-select: none;
 }
 .gbtn:active { background: #444; }
-#btn-st { font-size: 11px; letter-spacing: 2px; padding: 5px 16px; }
+#btn-st { font-size: 11px; letter-spacing: 2px; padding: 5px 0; width: 80px; text-align: center; }
 #hint {
   font-size: 10px;
   color: #555;
@@ -333,6 +333,7 @@ function drawOver(s){
   cx.font='bold 8px "Courier New"';
   cx.fillText('KAKI: '+s.kaki,cv.width/2,104);
   cx.fillText('> PUSH START <',cv.width/2,118);
+  updateStartBtn();
 }
 
 function drawTitle(){
@@ -357,13 +358,34 @@ function move(dir){
   kaniDir=dir;state.kani=n;sndMove();draw(state);
 }
 
+function updateStartBtn(){
+  var btn=document.getElementById('btn-st');
+  if(!state||state.over){
+    btn.textContent='START';
+  } else if(state.running){
+    btn.textContent='PAUSE';
+  } else {
+    btn.textContent='RESUME';
+  }
+}
+
 function startGame(){
-  if(timer)clearTimeout(timer);
-  try{getAC();}catch(e){}
-  particles=[];kaniDir=0;
-  state=newState();state.running=true;
-  spawn(state);updateHUD(state);draw(state);
-  timer=setTimeout(function(){tick(state);},interval(0));
+  if(!state||state.over){
+    if(timer)clearTimeout(timer);
+    try{getAC();}catch(e){}
+    particles=[];kaniDir=0;
+    state=newState();state.running=true;
+    spawn(state);updateHUD(state);draw(state);
+    timer=setTimeout(function(){tick(state);},interval(0));
+  } else if(state.running){
+    state.running=false;
+    clearTimeout(timer);
+  } else {
+    state.running=true;
+    try{getAC();}catch(e){}
+    timer=setTimeout(function(){tick(state);},interval(state.kaki));
+  }
+  updateStartBtn();
 }
 
 document.getElementById('btn-st').addEventListener('click',startGame);
