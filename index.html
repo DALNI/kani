@@ -320,7 +320,9 @@ function drawKakiHUD(count){
   kakiCtx.textBaseline='middle';
   kakiCtx.fillText('\u00d7',11,7);
   kakiCtx.font='bold 11px "Courier New"';
-  kakiCtx.fillText(String(count).padStart(2,'0'),22,7);
+  var num=String(count).padStart(2,'0');
+  kakiCtx.fillText(num[0],22,7);
+  kakiCtx.fillText(num[1],30,7);
 }
 
 var kaniDir=0,squishedKakis=[];
