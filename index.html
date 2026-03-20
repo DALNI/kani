@@ -305,7 +305,7 @@ hudCtx.imageSmoothingEnabled=false;
 function drawLifeHUD(life){
   hudCtx.clearRect(0,0,hudCv.width,hudCv.height);
   for(var i=0;i<3;i++)
-    hudCtx.drawImage(i<life?SPR_HEART_FULL:SPR_HEART_EMPTY,i*18+20,3);
+    hudCtx.drawImage(i<life?SPR_HEART_FULL:SPR_HEART_EMPTY,i*15+26,3);
 }
 
 var kakiCv=document.getElementById('h-kaki-cv');
@@ -430,8 +430,23 @@ function drawOver(s){
   cx.fillRect(20,70,2,60);cx.fillRect(198,70,2,60);
   cx.font='bold 10px "Courier New"';cx.textAlign='center';cx.textBaseline='middle';
   cx.fillText('GAME OVER',cv.width/2,88);
-  cx.font='bold 8px "Courier New"';
-  cx.fillText('KAKI: '+s.kaki,cv.width/2,104);
+  var goY=102;
+  var numStr=String(s.kaki).padStart(2,'0');
+  cx.font='bold 11px "Courier New"';
+  var numW=cx.measureText(numStr).width;
+  cx.font='bold 12px "Courier New"';
+  var mulW=cx.measureText('\u00d7').width;
+  var gap=4,iconW=SPR_KAKI_HUD.width;
+  var totalW=iconW+gap+mulW+gap+numW;
+  var startX=cv.width/2-totalW/2;
+  cx.drawImage(SPR_KAKI_HUD,startX,goY-4);
+  cx.fillStyle=C_DK;
+  cx.textAlign='left';cx.textBaseline='middle';
+  cx.font='bold 12px "Courier New"';
+  cx.fillText('\u00d7',startX+iconW+gap,goY);
+  cx.font='bold 11px "Courier New"';
+  cx.fillText(numStr,startX+iconW+gap+mulW+gap,goY);
+  cx.font='bold 8px "Courier New"';cx.textAlign='center';
   cx.fillText('> PUSH START <',cv.width/2,118);
   updateStartBtn();
 }
