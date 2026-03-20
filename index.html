@@ -145,6 +145,45 @@ function sndDrop(){
   });
 }
 function sndMiss(){beep(400,'triangle',0.12,0.1,200);}
+function sndStart(){
+  try{
+    var a=getAC();
+    [[523,0],[659,0],[784,0]].forEach(function(p){
+      var o=a.createOscillator(),g=a.createGain();
+      o.connect(g);g.connect(a.destination);o.type='square';
+      o.frequency.setValueAtTime(p[0],a.currentTime);
+      g.gain.setValueAtTime(0.08,a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.2);
+      o.start(a.currentTime);o.stop(a.currentTime+0.2);
+    });
+  }catch(e){}
+}
+function sndPause(){
+  try{
+    var a=getAC();
+    [[900,0,0.07],[600,0.08,0.1]].forEach(function(p){
+      var o=a.createOscillator(),g=a.createGain();
+      o.connect(g);g.connect(a.destination);o.type='sine';
+      o.frequency.setValueAtTime(p[0],a.currentTime+p[1]);
+      g.gain.setValueAtTime(0.15,a.currentTime+p[1]);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+p[1]+p[2]);
+      o.start(a.currentTime+p[1]);o.stop(a.currentTime+p[1]+p[2]);
+    });
+  }catch(e){}
+}
+function sndResume(){
+  try{
+    var a=getAC();
+    [[600,0,0.09],[900,0.1,0.12]].forEach(function(p){
+      var o=a.createOscillator(),g=a.createGain();
+      o.connect(g);g.connect(a.destination);o.type='triangle';
+      o.frequency.setValueAtTime(p[0],a.currentTime+p[1]);
+      g.gain.setValueAtTime(0.18,a.currentTime+p[1]);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+p[1]+p[2]);
+      o.start(a.currentTime+p[1]);o.stop(a.currentTime+p[1]+p[2]);
+    });
+  }catch(e){}
+}
 
 function makeSpr(data,w,h){
   var off=document.createElement('canvas');off.width=w;off.height=h;
@@ -388,14 +427,17 @@ function startGame(){
     try{getAC();}catch(e){}
     particles=[];kaniDir=0;
     state=newState();state.running=true;
+    sndStart();
     spawn(state);updateHUD(state);draw(state);
     timer=setTimeout(function(){tick(state);},interval(0));
   } else if(state.running){
     state.running=false;
     clearTimeout(timer);
+    sndPause();
   } else {
     state.running=true;
     try{getAC();}catch(e){}
+    sndResume();
     timer=setTimeout(function(){tick(state);},interval(state.kaki));
   }
   updateStartBtn();
