@@ -105,84 +105,100 @@ var state=null,timer=null,touchX=null,audioCtx=null;
 
 function getAC(){
   if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended')audioCtx.resume();
   return audioCtx;
 }
+function resumeAC(cb){
+  var a=getAC();
+  if(a.state==='suspended'){
+    a.resume().then(function(){cb(a);}).catch(function(){cb(a);});
+  } else {
+    cb(a);
+  }
+}
 function beep(freq,type,dur,vol,slide){
-  try{
-    var a=getAC(),o=a.createOscillator(),g=a.createGain();
-    o.connect(g);g.connect(a.destination);o.type=type;
-    o.frequency.setValueAtTime(freq,a.currentTime);
-    if(slide)o.frequency.exponentialRampToValueAtTime(slide,a.currentTime+dur);
-    g.gain.setValueAtTime(vol,a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
-    o.start(a.currentTime);o.stop(a.currentTime+dur);
-  }catch(e){}
+  resumeAC(function(a){
+    try{
+      var o=a.createOscillator(),g=a.createGain();
+      o.connect(g);g.connect(a.destination);o.type=type;
+      o.frequency.setValueAtTime(freq,a.currentTime);
+      if(slide)o.frequency.exponentialRampToValueAtTime(slide,a.currentTime+dur);
+      g.gain.setValueAtTime(vol,a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
+      o.start(a.currentTime);o.stop(a.currentTime+dur);
+    }catch(e){}
+  });
 }
 function sndMove(){beep(1400,'square',0.05,0.06,900);}
 function sndKaki(){
-  try{
-    var a=getAC(),o=a.createOscillator(),g=a.createGain();
-    o.connect(g);g.connect(a.destination);o.type='triangle';
-    o.frequency.setValueAtTime(1000,a.currentTime);
-    o.frequency.exponentialRampToValueAtTime(2400,a.currentTime+0.13);
-    g.gain.setValueAtTime(0.2,a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.13);
-    o.start(a.currentTime);o.stop(a.currentTime+0.13);
-  }catch(e){}
+  resumeAC(function(a){
+    try{
+      var o=a.createOscillator(),g=a.createGain();
+      o.connect(g);g.connect(a.destination);o.type='triangle';
+      o.frequency.setValueAtTime(1000,a.currentTime);
+      o.frequency.exponentialRampToValueAtTime(2400,a.currentTime+0.13);
+      g.gain.setValueAtTime(0.2,a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.13);
+      o.start(a.currentTime);o.stop(a.currentTime+0.13);
+    }catch(e){}
+  });
 }
 function sndFork(){beep(280,'sawtooth',0.15,0.18,110);}
 function sndDrop(){
-  [0,0.1,0.2].forEach(function(t,i){
-    try{
-      var a=getAC(),o=a.createOscillator(),g=a.createGain();
-      o.connect(g);g.connect(a.destination);o.type='sine';
-      o.frequency.setValueAtTime(800+i*400,a.currentTime+t);
-      g.gain.setValueAtTime(0.16,a.currentTime+t);
-      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+t+0.09);
-      o.start(a.currentTime+t);o.stop(a.currentTime+t+0.09);
-    }catch(e){}
+  resumeAC(function(a){
+    [0,0.1,0.2].forEach(function(t,i){
+      try{
+        var o=a.createOscillator(),g=a.createGain();
+        o.connect(g);g.connect(a.destination);o.type='sine';
+        o.frequency.setValueAtTime(800+i*400,a.currentTime+t);
+        g.gain.setValueAtTime(0.16,a.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+t+0.09);
+        o.start(a.currentTime+t);o.stop(a.currentTime+t+0.09);
+      }catch(e){}
+    });
   });
 }
 function sndMiss(){beep(400,'triangle',0.12,0.1,200);}
 function sndStart(){
-  try{
-    var a=getAC();
-    [[523,0],[659,0],[784,0]].forEach(function(p){
-      var o=a.createOscillator(),g=a.createGain();
-      o.connect(g);g.connect(a.destination);o.type='square';
-      o.frequency.setValueAtTime(p[0],a.currentTime);
-      g.gain.setValueAtTime(0.08,a.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.2);
-      o.start(a.currentTime);o.stop(a.currentTime+0.2);
-    });
-  }catch(e){}
+  resumeAC(function(a){
+    try{
+      [[523,0],[659,0],[784,0]].forEach(function(p){
+        var o=a.createOscillator(),g=a.createGain();
+        o.connect(g);g.connect(a.destination);o.type='square';
+        o.frequency.setValueAtTime(p[0],a.currentTime);
+        g.gain.setValueAtTime(0.08,a.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.2);
+        o.start(a.currentTime);o.stop(a.currentTime+0.2);
+      });
+    }catch(e){}
+  });
 }
 function sndPause(){
-  try{
-    var a=getAC();
-    [[900,0,0.07],[600,0.08,0.1]].forEach(function(p){
-      var o=a.createOscillator(),g=a.createGain();
-      o.connect(g);g.connect(a.destination);o.type='sine';
-      o.frequency.setValueAtTime(p[0],a.currentTime+p[1]);
-      g.gain.setValueAtTime(0.15,a.currentTime+p[1]);
-      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+p[1]+p[2]);
-      o.start(a.currentTime+p[1]);o.stop(a.currentTime+p[1]+p[2]);
-    });
-  }catch(e){}
+  resumeAC(function(a){
+    try{
+      [[900,0,0.07],[600,0.08,0.1]].forEach(function(p){
+        var o=a.createOscillator(),g=a.createGain();
+        o.connect(g);g.connect(a.destination);o.type='sine';
+        o.frequency.setValueAtTime(p[0],a.currentTime+p[1]);
+        g.gain.setValueAtTime(0.15,a.currentTime+p[1]);
+        g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+p[1]+p[2]);
+        o.start(a.currentTime+p[1]);o.stop(a.currentTime+p[1]+p[2]);
+      });
+    }catch(e){}
+  });
 }
 function sndResume(){
-  try{
-    var a=getAC();
-    [[600,0,0.07],[900,0.08,0.1]].forEach(function(p){
-      var o=a.createOscillator(),g=a.createGain();
-      o.connect(g);g.connect(a.destination);o.type='sine';
-      o.frequency.setValueAtTime(p[0],a.currentTime+p[1]);
-      g.gain.setValueAtTime(0.15,a.currentTime+p[1]);
-      g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+p[1]+p[2]);
-      o.start(a.currentTime+p[1]);o.stop(a.currentTime+p[1]+p[2]);
-    });
-  }catch(e){}
+  resumeAC(function(a){
+    try{
+      [[600,0,0.07],[900,0.08,0.1]].forEach(function(p){
+        var o=a.createOscillator(),g=a.createGain();
+        o.connect(g);g.connect(a.destination);o.type='sine';
+        o.frequency.setValueAtTime(p[0],a.currentTime+p[1]);
+        g.gain.setValueAtTime(0.15,a.currentTime+p[1]);
+        g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+p[1]+p[2]);
+        o.start(a.currentTime+p[1]);o.stop(a.currentTime+p[1]+p[2]);
+      });
+    }catch(e){}
+  });
 }
 
 function makeSpr(data,w,h){
@@ -425,7 +441,6 @@ function updateStartBtn(){
 function startGame(){
   if(!state||state.over){
     if(timer)clearTimeout(timer);
-    try{getAC();}catch(e){}
     squishedKakis=[];kaniDir=0;
     state=newState();state.running=true;
     sndStart();
@@ -437,7 +452,6 @@ function startGame(){
     sndPause();
   } else {
     state.running=true;
-    try{getAC();}catch(e){}
     sndResume();
     timer=setTimeout(function(){tick(state);},interval(state.kaki));
   }
