@@ -417,7 +417,16 @@ function drawTitle(){
   cx.fillText('[FORK] DANGER!',cv.width/2,114);
   cx.fillText('[DROP] RECOVER!',cv.width/2,128);
   cx.font='bold 11px "Courier New"';
-  cx.fillText('> PUSH START <',cv.width/2,155);
+  cx.fillText('> TAP TO START <',cv.width/2,155);
+}
+
+function initAudioAndStart(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  audioCtx.resume().then(function(){
+    if(!state||state.over) startGame();
+  }).catch(function(){
+    if(!state||state.over) startGame();
+  });
 }
 
 function move(dir){
@@ -483,11 +492,11 @@ function onBtnClick(fn){
 document.getElementById('btn-st').addEventListener('touchstart',function(e){
   e.preventDefault();
   touched=true;
-  if(!audioCtx){
-    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    audioCtx.resume();
+  if(!state||state.over){
+    initAudioAndStart();
+  } else {
+    startGame();
   }
-  startGame();
   setTimeout(function(){touched=false;},500);
 },{passive:false});
 document.getElementById('btn-l').addEventListener('touchstart',onBtnTouch(function(){move(-1);}),{passive:false});
@@ -508,8 +517,12 @@ cv.addEventListener('touchstart',function(e){touchX=e.touches[0].clientX;},{pass
 cv.addEventListener('touchend',function(e){
   if(touchX===null)return;
   var dx=e.changedTouches[0].clientX-touchX;
-  if(Math.abs(dx)>8)move(dx<0?-1:1);
   touchX=null;
+  if(!state||state.over){
+    initAudioAndStart();
+    return;
+  }
+  if(Math.abs(dx)>8)move(dx<0?-1:1);
 },{passive:true});
 
 drawLifeHUD(3);
