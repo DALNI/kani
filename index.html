@@ -480,7 +480,14 @@ function onBtnClick(fn){
   };
 }
 
-document.getElementById('btn-st').addEventListener('touchstart',onBtnTouch(startGame),{passive:false});
+document.getElementById('btn-st').addEventListener('touchstart',function(e){
+  e.preventDefault();
+  touched=true;
+  var a=new(window.AudioContext||window.webkitAudioContext)();
+  audioCtx=a;
+  a.resume().then(function(){startGame();}).catch(function(){startGame();});
+  setTimeout(function(){touched=false;},500);
+},{passive:false});
 document.getElementById('btn-l').addEventListener('touchstart',onBtnTouch(function(){move(-1);}),{passive:false});
 document.getElementById('btn-r').addEventListener('touchstart',onBtnTouch(function(){move(1);}),{passive:false});
 
